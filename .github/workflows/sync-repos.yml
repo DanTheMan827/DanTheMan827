@@ -3,6 +3,7 @@ name: Sync Repos
 on:
   schedule:
     - cron: '0 0 * * *' # Runs every day at midnight UTC
+
   workflow_dispatch:
 
 jobs:
@@ -18,28 +19,23 @@ jobs:
             force_push: true
 
     steps:
-      - name: Checkout ${{ matrix.repo_to_update }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.repo_to_update }}
-          token: ${{ secrets.METRICS_TOKEN }}
-          ref: ${{ matrix.ref_to_update }}
-
-      - name: Add ${{ matrix.remote_repo }} and Fetch
+      - name: Checkout remote repository
         run: |
-          git remote add upstream "${{ matrix.remote_repo }}"
-          git fetch upstream
-
-      - name: Reset to Upstream
+          git clone --branch "${{ matrix.remote_ref }}" "${{ matrix.remote_repo }}" .
+          git remote add update "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ matrix.repo_to_update }}.git"
+          git fetch update
+          
+      - name: Add repository to be updated
         run: |
-          git reset --hard "upstream/${{ matrix.remote_ref }}"
+          git remote add update "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ matrix.repo_to_update }}.git"
+          git fetch update
 
-      - name: Push changes to fork
+      - name: Push to repository to be updated
         run: |
           if [ "${{ matrix.force_push }}" == "true" ]; then
-            git push origin ${{ matrix.ref_to_update }} --force
+            git push update "${{ matrix.remote_ref }}:${{ matrix.ref_to_update }}" --force
           else
-            git push origin ${{ matrix.ref_to_update }}
+            git push update "${{ matrix.remote_ref }}:${{ matrix.ref_to_update }}"
           fi
 
   keepalive:
@@ -47,9 +43,10 @@ jobs:
     steps:
       - name: Ammend commit and force-push the current repo
         run: |
+          mkdir -p "${{ github.repository }}"
+          cd "${{ github.repository }}"
+          git clone "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ github.repository }}.git" .
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git clone "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ github.repository }}.git"
           git commit --amend --no-edit
           git push --force
