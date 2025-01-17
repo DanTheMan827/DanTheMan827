@@ -1,0 +1,63 @@
+name: Sync Repos
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - repo_to_update: 'DanTheMan827/winget-pkgs'
+            remote_repo: 'https://github.com/microsoft/winget-pkgs.git'
+            remote_ref: 'master'
+            ref_to_update: 'master'
+            force_push: true
+
+    steps:
+      - name: Checkout ${{ matrix.repo_to_update }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo_to_update }}
+          token: ${{ secrets.METRICS_TOKEN }}
+          ref: ${{ matrix.ref_to_update }}
+
+      - name: Add ${{ matrix.remote_repo }} and Fetch
+        run: |
+          git remote add upstream "${{ matrix.remote_repo }}"
+          git fetch upstream
+
+      - name: Reset to Upstream
+        run: |
+          git reset --hard "upstream/${{ matrix.remote_ref }}"
+
+      - name: Push changes to fork
+        run: |
+          if [ "${{ matrix.force_push }}" == "true" ]; then
+            git push origin ${{ matrix.ref_to_update }} --force
+          else
+            git push origin ${{ matrix.ref_to_update }}
+          fi
+
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout ${{ matrix.repo_to_update }}
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          ref: ${{ env.GITHUB_REF }}
+
+      - name: Ammend commit and force-push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git reset "origin/master" --hard
+          git commit --amend --no-edit
+          git push origin "HEAD:master" --force
