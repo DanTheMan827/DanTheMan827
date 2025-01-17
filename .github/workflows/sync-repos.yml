@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - repo_to_update: 'DanTheMan827/winget-pkgs'
+          - repo_to_update: '${{ github.repository_owner }}/winget-pkgs'
             remote_repo: 'https://github.com/microsoft/winget-pkgs.git'
             remote_ref: 'master'
             ref_to_update: 'master'
@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ammend commit and force-push the current repo
+        continue-on-error: true
         run: |
           mkdir -p "${{ github.repository }}"
           cd "${{ github.repository }}"
