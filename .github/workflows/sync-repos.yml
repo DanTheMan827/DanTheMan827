@@ -44,20 +44,12 @@ jobs:
 
   keepalive:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout ${{ matrix.repo_to_update }}
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.METRICS_TOKEN }}
-          ref: ${{ env.GITHUB_REF }}
-
-      - name: Ammend commit and force-push
+      - name: Ammend commit and force-push the current repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git reset "origin/master" --hard
+
+          git clone "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ github.repository }}.git"
           git commit --amend --no-edit
-          git push origin "HEAD:master" --force
+          git push --force
