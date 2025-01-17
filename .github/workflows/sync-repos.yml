@@ -22,8 +22,6 @@ jobs:
       - name: Checkout remote repository
         run: |
           git clone --branch "${{ matrix.remote_ref }}" "${{ matrix.remote_repo }}" .
-          git remote add update "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ matrix.repo_to_update }}.git"
-          git fetch update
           
       - name: Add repository to be updated
         run: |
