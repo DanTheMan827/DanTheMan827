@@ -17,6 +17,11 @@ jobs:
             remote_ref: 'master'
             ref_to_update: 'master'
             force_push: true
+          - repo_to_update: '${{ github.repository_owner }}/bsqmods'
+            remote_repo: 'https://github.com/QuestPackageManager/bsqmods'
+            remote_ref: 'main'
+            ref_to_update: 'main'
+            force_push: true
 
     steps:
       - name: Checkout remote repository
