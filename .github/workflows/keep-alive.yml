@@ -1,0 +1,23 @@
+# Ammends the latest commit and pushes to keep the repository and associated actions active.
+name: Keep active
+
+on:
+  schedule:
+    - cron: '0 23 * * *' # Runs every day at 11PM UTC
+
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ammend commit and force-push the current repo
+        continue-on-error: true
+        run: |
+          mkdir -p "${{ github.repository }}"
+          cd "${{ github.repository }}"
+          git clone "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ github.repository }}.git" .
+          git config user.name "$(git log -1 --pretty=format:"%an")"
+          git config user.email "$(git log -1 --pretty=format:"%ae")"
+          git commit --amend --no-edit
+          git push --force
