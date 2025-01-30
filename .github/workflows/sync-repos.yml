@@ -2,7 +2,7 @@ name: Sync Repos
 
 on:
   schedule:
-    - cron: '0 23 * * *' # Runs every day at 11PM UTC
+    - cron: '0 * * * *' # Runs every hour
 
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ jobs:
             remote_repo: 'https://github.com/QuestPackageManager/bsqmods'
             remote_ref: 'main'
             ref_to_update: 'main'
-            force_push: true
+            force_push: false
 
     steps:
       - name: Checkout remote repository
