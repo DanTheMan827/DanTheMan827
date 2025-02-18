@@ -1,0 +1,58 @@
+name: Update Amiibo Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'The repository to dispatch'
+        required: true
+
+      workflow:
+        description: 'The workflow to dispatch'
+        required: true
+
+      ref:
+        description: 'The ref to run the workflow on'
+        required: false
+        default: ''
+
+  workflow_call:
+    inputs:
+      repository:
+        description: 'The repository to dispatch'
+        required: true
+        type: string
+
+      workflow:
+        description: 'The workflow to dispatch'
+        required: true
+        type: string
+
+      ref:
+        description: 'The ref to run the workflow on'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch ${{ inputs.workflow }} from ${{ inputs.repository }}
+        id: dispatch
+        run: |
+          if [[ ! -z "${{ inputs.ref }}" ]]; then
+            data='{"ref":"${{ inputs.ref }}"}'
+          fi
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.METRICS_TOKEN }}" \
+            https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow }}/dispatches \
+            -d "$data")
+
+          if [ $response -ne 204 ]; then
+            echo "Workflow dispatch failed with response code $response"
+            exit 1
+          fi
