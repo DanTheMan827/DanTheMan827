@@ -11,3 +11,4 @@ jobs:
     with:
       repository: DanTheMan827/AmiiboData
       workflow: update-data.yml
+    secrets: inherit
