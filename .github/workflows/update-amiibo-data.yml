@@ -1,0 +1,19 @@
+name: Update Amiibo Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch Update Data Workflow
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.METRICS_TOKEN }}" \
+            https://api.github.com/repos/DanTheMan827/AmiiboData/actions/workflows/update-data.yml/dispatches \
+            -d '{"ref":"main"}'
