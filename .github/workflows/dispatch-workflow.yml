@@ -39,18 +39,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Get default branch if ref is empty
+        id: get_ref
+        run: |
+          if [[ -z "${{ inputs.ref }}" ]]; then
+            default_branch=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ secrets.METRICS_TOKEN }}" \
+              https://api.github.com/repos/${{ inputs.repository }} | jq -r '.default_branch')
+            echo "ref=${default_branch}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Dispatch ${{ inputs.workflow }} from ${{ inputs.repository }}
         id: dispatch
         run: |
-          if [[ ! -z "${{ inputs.ref }}" ]]; then
-            data='{"ref":"${{ inputs.ref }}"}'
-          fi
-          
           response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.METRICS_TOKEN }}" \
             https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow }}/dispatches \
-            -d "$data")
+            -d '{"ref":"${{ steps.get_ref.outputs.ref }}"}')
 
           if [ $response -ne 204 ]; then
             echo "Workflow dispatch failed with response code $response"
