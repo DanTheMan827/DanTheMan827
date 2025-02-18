@@ -1,4 +1,4 @@
-name: Update Amiibo Data
+name: Dispatch Workflow
 
 on:
   workflow_dispatch:
