@@ -31,7 +31,7 @@ jobs:
           
       - name: Add repository to be updated
         run: |
-          git remote add update "https://${{ github.repository_owner }}:${{ secrets.METRICS_TOKEN }}@github.com/${{ matrix.repo_to_update }}.git"
+          git remote add update "https://${{ github.repository_owner }}:${{ secrets.MIRROR_TOKEN }}@github.com/${{ matrix.repo_to_update }}.git"
           git fetch update
 
       - name: Push to repository to be updated
