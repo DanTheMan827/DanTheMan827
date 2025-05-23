@@ -1,0 +1,14 @@
+name: Update rapidjson qpm module
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight
+
+jobs:
+  dispatch:
+    uses: ./.github/workflows/dispatch-workflow.yml
+    with:
+      repository: DanTheMan827-QPM/json
+      workflow: update-latest-tag.yml
+    secrets: inherit
