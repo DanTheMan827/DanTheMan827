@@ -1,4 +1,4 @@
-name: Update rapidjson qpm module
+name: Update json qpm module
 
 on:
   workflow_dispatch:
